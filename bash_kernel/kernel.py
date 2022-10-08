@@ -11,7 +11,7 @@ import shlex
 import signal
 import subprocess
 
-__version__ = '0.8.0'
+__version__ = '0.8.1'
 
 version_pat = re.compile(r'version (\d+(\.\d+)+)')
 
