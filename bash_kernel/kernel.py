@@ -256,14 +256,13 @@ class BashKernel(Kernel):
                 output = self.bashwrapper.run_command(cmd).rstrip()
                 completions = set(output.split())
                 # append matches including leading $
-                matches |= {'$' + c for c in completions}
+                matches |= {'$' + c for c in completions if c.startswith(token[0])}
             else:
                 # complete functions and builtins
                 cmd = 'compgen -cdfa %s' % token
                 output = self.bashwrapper.run_command(cmd).rstrip()
-                matches |= {escape(item) for item in output.splitlines()}
+                matches |= {escape(c) for c in output.splitlines() if c.startswith(token)}
 
-            matches = {m for m in matches if m.startswith(token)}
 
         # bash completion
         line = code.split('\n')[-1]
