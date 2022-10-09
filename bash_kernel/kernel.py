@@ -1,4 +1,4 @@
-from typing import List
+from typing import Set
 from ipykernel.kernelbase import Kernel
 from pexpect import replwrap, EOF
 import pexpect
@@ -195,7 +195,7 @@ class BashKernel(Kernel):
         if not tokens:
             return default
 
-        matches = []
+        matches = set()
         token = tokens[-1]
         offset = 0 if code_wo_semicolon[-1] in (' ', '=') else len(token)
         start = cursor_pos - offset
@@ -207,30 +207,30 @@ class BashKernel(Kernel):
                 output = self.bashwrapper.run_command(cmd).rstrip()
                 completions = set(output.split())
                 # append matches including leading $
-                matches.extend(['$'+c for c in completions])
+                matches |= {'$' + c for c in completions}
             else:
                 # complete functions and builtins
                 cmd = 'compgen -cdfa %s' % token
                 output = self.bashwrapper.run_command(cmd).rstrip()
-                matches.extend(output.split())
+                matches |= {escape(item) for item in output.splitlines()}
 
-            matches = sorted([m for m in matches if m.startswith(token)])
+            matches = {m for m in matches if m.startswith(token)}
 
         # bash completion
         line = code.split('\n')[-1]
         if line:
             candidates = call_completer(line)
-            matches.extend(candidates)
+            matches |= set(candidates)
 
         if not matches:
             return default
 
-        return {'matches': matches, 'cursor_start': start,
+        return {'matches': sorted(matches), 'cursor_start': start,
                 'cursor_end': cursor_pos, 'metadata': dict(),
                 'status': 'ok'}
 
 
-def call_completer(line: str) -> List[str]:
+def call_completer(line: str) -> Set[str]:
     """Run completer.sh for shell completion
 
     Argument:
@@ -244,13 +244,13 @@ def call_completer(line: str) -> List[str]:
     cmd = "{} {}".format(shlex.quote(completer_script), shlex.quote(line))
     res = subprocess.run(cmd, capture_output=True, shell=True)
     if res.returncode != 0:
-        return []
+        return set()
     output = res.stdout.decode()
 
     # This .strip() takes care of subcommand completion that
     # often (always?) come with a space at the end.
     # It fails to capture path completion of filenames like 'blah  '.
-    return [escape(x.strip()) for x in output.splitlines() if x.strip()]
+    return {escape(x.strip()) for x in output.splitlines() if x.strip()}
 
 
 def escape(s: str) -> str:
