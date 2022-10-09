@@ -257,7 +257,7 @@ class BashKernel(Kernel):
                 completions = set(output.split())
                 # append matches including leading $
                 matches |= {'$' + c for c in completions if c.startswith(token[0])}
-            else:
+            elif len(token) > 1:
                 # complete functions and builtins
                 cmd = 'compgen -cdfa %s' % token
                 output = self.bashwrapper.run_command(cmd).rstrip()
