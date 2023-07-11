@@ -1,1 +1,1 @@
-bash_kernel
+bash_kernel @ git+https://github.com/yamaton/bash_kernel.git@fix-trailing-backslash
