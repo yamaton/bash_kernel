@@ -1,5 +1,5 @@
 .. image:: https://mybinder.org/badge_logo.svg
- :target: https://mybinder.org/v2/gh/takluyver/bash_kernel/master
+ :target: https://mybinder.org/v2/gh/yamaton/bash_kernel/dev
 
 =========================
 A Jupyter kernel for bash
